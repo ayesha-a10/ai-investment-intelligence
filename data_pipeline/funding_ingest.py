@@ -1,5 +1,5 @@
 import pandas as pd
-from database import get_connection
+from data_pipeline.database import get_connection
 
 CSV_PATH = "data/raw_funding.csv"
 
