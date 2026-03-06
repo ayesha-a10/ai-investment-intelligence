@@ -32,7 +32,7 @@ def startup_event():
 def dashboard():
 
     hype = get_table("hype_scores")
-    funding = get_table("funding")
+    funding = get_table("funding_data")
 
     return {
         "status": "AI Investment Intelligence API Running",
