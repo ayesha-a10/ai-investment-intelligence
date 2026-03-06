@@ -2,7 +2,7 @@ import requests
 import os
 import time
 from dotenv import load_dotenv
-from database import create_news_table, get_connection
+from data_pipeline.database import create_news_table, get_connection
 
 load_dotenv()
 
