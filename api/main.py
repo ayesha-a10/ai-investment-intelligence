@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import pandas as pd
 from data_pipeline.database import get_connection
 from data_pipeline.funding_ingest import create_funding_table
-from analytics.hype_analysis import create_hype_table
+from analytics.hype_analysis import calculate_hype
 
 app = FastAPI()
 
