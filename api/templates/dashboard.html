@@ -3,28 +3,16 @@
 <head>
     <title>AI Investment Intelligence</title>
 </head>
-<body>
-    <h1>AI Investment Intelligence Dashboard</h1>
 
-    <h2>📈 Hype Scores</h2>
-    <ul>
-        {% for row in hype %}
-        <li>Topic {{ row.topic }} — {{ row.hype_score }}</li>
-        {% endfor %}
-    </ul>
+<body style="font-family: Arial; margin:40px">
 
-    <h2>💰 Capital Distribution</h2>
-    <ul>
-        {% for row in capital %}
-        <li>{{ row.funding_stage }} — {{ row.capital_share }}</li>
-        {% endfor %}
-    </ul>
+<h1>AI Investment Intelligence Dashboard</h1>
 
-    <h2>🚀 Emerging Opportunities</h2>
-    <ul>
-        {% for row in emerging %}
-        <li>Topic {{ row.topic }} — {{ row.emerging_score }}</li>
-        {% endfor %}
-    </ul>
+<p>Live analytics of AI technology trends</p>
+
+<div>
+    {{ chart | safe }}
+</div>
+
 </body>
 </html>
