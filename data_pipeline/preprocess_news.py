@@ -1,6 +1,6 @@
 import pandas as pd
 import re
-from database import get_connection
+from data_pipeline.database import get_connection
 
 
 def clean_text(text):
