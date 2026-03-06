@@ -23,7 +23,7 @@ def startup_event():
     print("Creating database tables...")
 
     create_funding_table()
-    create_hype_table()
+    calculate_hype()
 
     print("Tables ready.")
 
