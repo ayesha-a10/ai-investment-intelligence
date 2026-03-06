@@ -2,7 +2,6 @@ from fastapi import FastAPI
 import pandas as pd
 from data_pipeline.database import get_connection
 from data_pipeline.funding_ingest import create_funding_table
-from data_pipeline.patent_ingest import create_patent_table
 from analytics.hype_score import create_hype_table
 
 
@@ -25,7 +24,6 @@ def startup_event():
     print("Creating database tables...")
 
     create_funding_table()
-    create_patent_table()
     create_hype_table()
 
     print("Tables ready.")
