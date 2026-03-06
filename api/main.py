@@ -1,10 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 import pandas as pd
+import plotly.express as px
+
 from data_pipeline.database import get_connection
-from data_pipeline.funding_ingest import create_funding_table
-from analytics.hype_analysis import calculate_hype
 
 app = FastAPI()
+
+templates = Jinja2Templates(directory="api/templates")
 
 
 def get_table(table_name: str):
@@ -18,27 +22,30 @@ def get_table(table_name: str):
         conn.close()
 
 
-@app.on_event("startup")
-def startup_event():
-    print("Creating database tables...")
-
-    create_funding_table()
-    calculate_hype()
-
-    print("Tables ready.")
-
-
-@app.get("/")
-def dashboard():
+@app.get("/", response_class=HTMLResponse)
+def dashboard(request: Request):
 
     hype = get_table("hype_scores")
-    funding = get_table("funding_data")
 
-    return {
-        "status": "AI Investment Intelligence API Running",
-        "hype_scores": hype.to_dict(orient="records"),
-        "funding": funding.to_dict(orient="records")
-    }
+    if hype.empty:
+        chart_html = "<h3>No data available</h3>"
+    else:
+        fig = px.bar(
+            hype,
+            x="topic",
+            y="hype_score",
+            title="AI Topic Hype Scores",
+        )
+
+        chart_html = fig.to_html(full_html=False)
+
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request,
+            "chart": chart_html,
+        },
+    )
 
 
 @app.get("/health")
