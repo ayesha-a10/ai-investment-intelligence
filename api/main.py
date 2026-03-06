@@ -1,75 +1,51 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI
 import pandas as pd
 from data_pipeline.database import get_connection
-from data_pipeline.funding_ingest import create_funding_table, ingest_funding
-from data_pipeline.preprocess_news import preprocess_news
-from analytics.hype_analysis import calculate_hype
-from analytics.capital_analysis import calculate_capital_distribution
-from analytics.emerging_score import calculate_emerging_score
+from data_pipeline.funding_ingest import create_funding_table
+from data_pipeline.patent_ingest import create_patent_table
+from analytics.hype_score import create_hype_table
 
-app = FastAPI(title="AI Investment Intelligence API")
+
+app = FastAPI()
+
+
+def get_table(table_name: str):
+    conn = get_connection()
+    try:
+        df = pd.read_sql(f"SELECT * FROM {table_name}", conn)
+        return df
+    except Exception:
+        return pd.DataFrame()
+    finally:
+        conn.close()
+        
 
 @app.on_event("startup")
-def initialize_pipeline():
-    print("Starting pipeline initialization...")
+def startup_event():
+    print("Creating database tables...")
 
-    try:
-        create_funding_table()
-        ingest_funding()
-        preprocess_news()
-        calculate_hype()
-        calculate_capital_distribution()
-        calculate_emerging_score()
+    create_funding_table()
+    create_patent_table()
+    create_hype_table()
 
-        print("Pipeline initialized successfully.")
-
-    except Exception as e:
-        print("Startup error:", e)
-
-templates = Jinja2Templates(directory="api/templates")
+    print("Tables ready.")
 
 
-def get_table(table_name):
-    conn = get_connection()
-    df = pd.read_sql(f"SELECT * FROM {table_name}", conn)
-    conn.close()
-    return df
+@app.get("/")
+def dashboard():
 
-
-@app.get("/topics")
-def get_topics():
-    return get_table("topic_summary").to_dict(orient="records")
-
-
-@app.get("/hype")
-def get_hype():
-    return get_table("hype_scores").to_dict(orient="records")
-
-
-@app.get("/capital")
-def get_capital():
-    return get_table("capital_distribution").to_dict(orient="records")
-
-
-@app.get("/emerging")
-def get_emerging():
-    return get_table("emerging_opportunities").to_dict(orient="records")
-
-
-@app.get("/", response_class=HTMLResponse)
-def dashboard(request: Request):
     hype = get_table("hype_scores")
-    capital = get_table("capital_distribution")
-    emerging = get_table("emerging_opportunities")
+    funding = get_table("funding")
+    patents = get_table("patents")
 
-    return templates.TemplateResponse(
-        "dashboard.html",
-        {
-            "request": request,
-            "hype": hype.to_dict(orient="records"),
-            "capital": capital.to_dict(orient="records"),
-            "emerging": emerging.to_dict(orient="records"),
-        },
-    )
+    return {
+        "status": "AI Investment Intelligence API Running",
+        "hype_scores": hype.to_dict(orient="records"),
+        "funding": funding.to_dict(orient="records"),
+        "patents": patents.to_dict(orient="records"),
+    }
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
